@@ -1,3 +1,4 @@
+import asyncio
 import homeassistant.helpers.config_validation as cv
 import logging
 import voluptuous as vol
@@ -34,10 +35,10 @@ from .const import (
 _LOGGER = logging.getLogger(__name__)
 
 class SeatConnectConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
-    VERSION = 2
-    task_login = None
-    task_finish = None
-    task_get_vehicles = None
+    VERSION = 3
+    task_login: asyncio.Task | None = None
+    task_finish: asyncio.Task | None = None
+    task_get_vehicles: asyncio.Task | None = None
     entry = None
 
     def __init__(self):
@@ -193,6 +194,7 @@ class SeatConnectConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             return self.async_show_progress(
                 step_id="login",
                 progress_action="task_login",
+                progress_task=self.task_login,
             )
 
         # noinspection PyBroadException
@@ -213,7 +215,8 @@ class SeatConnectConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
             return self.async_show_progress(
                 step_id="get_vehicles",
-                progress_action="task_get_vehicles"
+                progress_action="task_get_vehicles",
+                progress_task=self.task_get_vehicles,
             )
 
         # noinspection PyBroadException
